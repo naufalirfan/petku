@@ -63,6 +63,14 @@ class PetGame extends FlameGame with HasCollisionDetection {
   void spawnBurst(BurstType type) {
     try { add(BurstEffect(at: pet.position.clone(), type: type)); } catch (_) {}
   }
+  void onPetTapped() {
+    if (isGameOver) return;
+    pet.playHappyAnimation();
+    spawnBurst(BurstType.hearts);
+    audioManager.playSfx('button');
+    statusSystem.modifyHappy(1);
+    saveSystem.save();
+  }
   void disposeGame() { try { adSystem.dispose(); } catch (_) {} try { audioManager.dispose(); } catch (_) {} }
   void onAppResumed() {
     if (lastBackgroundTime != null) {

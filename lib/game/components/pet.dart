@@ -1,11 +1,12 @@
 import 'dart:math' as math;
 import 'package:flame/components.dart';
+import 'package:flame/events.dart';
 import 'package:flutter/material.dart';
 import '../pet_game.dart';
 
 enum PetMood { idle, eat, bath, sleep, happy, sad }
 
-class PetComponent extends PositionComponent {
+class PetComponent extends PositionComponent with TapCallbacks {
   final PetGame game;
   PetMood mood = PetMood.idle;
   double _moodTimer = 0;
@@ -89,9 +90,22 @@ class PetComponent extends PositionComponent {
     canvas.restore();
   }
 
+  @override
+  void onTapDown(TapDownEvent event) {
+    super.onTapDown(event);
+    game.onPetTapped();
+  }
+
   void _renderVector(Canvas canvas, Offset center) {
     final paint = Paint()..color = _moodColor();
-    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: center, width: 110, height: 110), const Radius.circular(36)), paint);
+    // Rounded body with subtle 3D shading
+    canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: center, width: 110, height: 110), const Radius.circular(38)), paint);
+    
+    // Ears/horns
+    final earPaint = Paint()..color = _moodColor().withValues(alpha: 0.85);
+    canvas.drawCircle(Offset(center.dx - 36, center.dy - 48), 12, earPaint);
+    canvas.drawCircle(Offset(center.dx + 36, center.dy - 48), 12, earPaint);
+
     final eyePaint = Paint()..color = Colors.white;
     final pupil = Paint()..color = Colors.black;
     if (_blink) {
@@ -102,7 +116,16 @@ class PetComponent extends PositionComponent {
       canvas.drawCircle(Offset(center.dx + 22, center.dy - 12), 14, eyePaint);
       canvas.drawCircle(Offset(center.dx - 22, center.dy - 10), 6, pupil);
       canvas.drawCircle(Offset(center.dx + 22, center.dy - 10), 6, pupil);
+      // Eye reflections
+      canvas.drawCircle(Offset(center.dx - 25, center.dy - 14), 2.5, Paint()..color = Colors.white);
+      canvas.drawCircle(Offset(center.dx + 19, center.dy - 14), 2.5, Paint()..color = Colors.white);
     }
+
+    // Rosy Cheeks
+    final blushPaint = Paint()..color = const Color(0xFFFF7675).withValues(alpha: 0.45);
+    canvas.drawOval(Rect.fromCenter(center: Offset(center.dx - 34, center.dy + 8), width: 14, height: 8), blushPaint);
+    canvas.drawOval(Rect.fromCenter(center: Offset(center.dx + 34, center.dy + 8), width: 14, height: 8), blushPaint);
+
     final mouthPaint = Paint()..color = Colors.black..style = PaintingStyle.stroke..strokeWidth = 3..strokeCap = StrokeCap.round;
     final mouth = switch (mood) {
       PetMood.happy || PetMood.eat => Path()..moveTo(center.dx - 14, center.dy + 18)..quadraticBezierTo(center.dx, center.dy + 30, center.dx + 14, center.dy + 18),
@@ -110,7 +133,10 @@ class PetComponent extends PositionComponent {
       _ => Path()..moveTo(center.dx - 10, center.dy + 22)..lineTo(center.dx + 10, center.dy + 22),
     };
     canvas.drawPath(mouth, mouthPaint);
-    if (outfitId != 'none') { final c = outfitId == 'shirt_basic' ? const Color(0xFF74B9FF) : const Color(0xFFFFD93D); canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(center.dx, center.dy + 18), width: 72, height: 28), const Radius.circular(10)), Paint()..color = c); }
+    if (outfitId != 'none') {
+      final c = outfitId == 'shirt_basic' ? const Color(0xFF74B9FF) : const Color(0xFFFFD93D);
+      canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromCenter(center: Offset(center.dx, center.dy + 22), width: 76, height: 30), const Radius.circular(10)), Paint()..color = c);
+    }
   }
 
   Color _moodColor() => switch (mood) {

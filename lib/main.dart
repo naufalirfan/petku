@@ -39,7 +39,7 @@ class PetGameApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Pet Game',
+      title: 'Petku',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(useMaterial3: true, colorSchemeSeed: const Color(0xFF6C5CE7)),
       home: const GameScreen(),

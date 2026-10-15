@@ -3,7 +3,7 @@ import 'dart:math' as math;
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 
-enum BurstType { bubbles, confetti }
+enum BurstType { bubbles, confetti, hearts }
 
 class BurstEffect extends Component {
   BurstEffect({required Vector2 at, required BurstType type}) {
@@ -26,6 +26,23 @@ class BurstEffect extends Component {
           radius: 4 + _rand.nextDouble() * 7,
           vel: Vector2((_rand.nextDouble() - 0.5) * 60, -70 - _rand.nextDouble() * 90),
           life: 0.7 + _rand.nextDouble() * 0.6,
+        ));
+      }
+    } else if (_type == BurstType.hearts) {
+      final heartColors = [
+        const Color(0xFFFF4757),
+        const Color(0xFFFF6B81),
+        const Color(0xFFFF7675),
+        const Color(0xFFFD79A8),
+      ];
+      for (int i = 0; i < 8; i++) {
+        final offset = Vector2((_rand.nextDouble() - 0.5) * 60, (_rand.nextDouble() - 0.5) * 30);
+        add(_Heart(
+          position: _at + offset,
+          vel: Vector2((_rand.nextDouble() - 0.5) * 40, -60 - _rand.nextDouble() * 60),
+          color: heartColors[_rand.nextInt(heartColors.length)],
+          life: 0.8 + _rand.nextDouble() * 0.5,
+          sizeVal: 14 + _rand.nextDouble() * 10,
         ));
       }
     } else {
@@ -51,7 +68,7 @@ class BurstEffect extends Component {
     }
     // auto remove burst container after longest life
     add(TimerComponent(
-      period: 1.4,
+      period: 1.5,
       onTick: () => removeFromParent(),
     ));
   }
@@ -156,6 +173,60 @@ class _Confetti extends PositionComponent {
         paint,
       );
     }
+    canvas.restore();
+  }
+}
+
+class _Heart extends PositionComponent {
+  _Heart({
+    required Vector2 position,
+    required this.vel,
+    required this.color,
+    required double life,
+    required double sizeVal,
+  })  : life = life,
+        maxLife = life {
+    this.position = position;
+    anchor = Anchor.center;
+    size = Vector2.all(sizeVal);
+  }
+  late Vector2 vel;
+  late Color color;
+  late double life;
+  late double maxLife;
+  double _wobble = 0;
+
+  @override
+  void update(double dt) {
+    super.update(dt);
+    life -= dt;
+    if (life <= 0) {
+      removeFromParent();
+      return;
+    }
+    _wobble += dt * 5;
+    position += vel * dt;
+    position.x += math.sin(_wobble) * 0.8;
+    vel.y -= 15 * dt; // gentle float upward
+  }
+
+  @override
+  void render(Canvas canvas) {
+    final o = (life / maxLife).clamp(0.0, 1.0);
+    final scale = (0.5 + 0.5 * (life / maxLife)).clamp(0.0, 1.0);
+    final w = size.x * scale;
+    final h = size.y * scale;
+    final path = Path();
+    path.moveTo(w / 2, h * 0.85);
+    path.cubicTo(w * 0.1, h * 0.55, 0, h * 0.25, w * 0.25, h * 0.08);
+    path.cubicTo(w * 0.45, -h * 0.05, w / 2, h * 0.2, w / 2, h * 0.28);
+    path.cubicTo(w / 2, h * 0.2, w * 0.55, -h * 0.05, w * 0.75, h * 0.08);
+    path.cubicTo(w, h * 0.25, w * 0.9, h * 0.55, w / 2, h * 0.85);
+    path.close();
+
+    canvas.save();
+    canvas.translate((size.x - w) / 2, (size.y - h) / 2);
+    canvas.drawPath(path, Paint()..color = color.withValues(alpha: o));
     canvas.restore();
   }
 }
