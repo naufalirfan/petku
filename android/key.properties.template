@@ -1,0 +1,4 @@
+storeFile=/home/kamu/petgame-release.jks
+storePassword=GANTI_PASSWORD_KUAT
+keyAlias=petgame
+keyPassword=GANTI_PASSWORD_KUAT
