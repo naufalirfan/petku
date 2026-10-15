@@ -1,4 +1,4 @@
-package com.namamu.petgame.pet_game
+package com.petku.game
 
 import io.flutter.embedding.android.FlutterActivity
 
