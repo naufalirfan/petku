@@ -48,9 +48,10 @@ android {
     buildTypes {
         release {
             signingConfig = if (hasReleaseKey) signingConfigs.getByName("release") else signingConfigs.getByName("debug")
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // force-close fix: matikan minify dulu, R8 strip class/resource kepotong di release
+            isMinifyEnabled = false
+            isShrinkResources = false
+            // proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
 }
