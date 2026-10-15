@@ -2,6 +2,7 @@ import 'package:flame/game.dart';
 import 'package:flame/components.dart';
 import 'components/pet.dart';
 import 'components/pet_particles.dart';
+import 'components/bedroom.dart';
 import 'systems/status_system.dart';
 import 'systems/save_system.dart';
 import 'systems/ad_system.dart';
@@ -18,7 +19,7 @@ class PetGame extends FlameGame with HasCollisionDetection {
   late final AudioManager audioManager;
   PetState get petState => saveSystem.petState;
   bool isGameOver = false;
-  SpriteComponent? _bg;
+  BedroomComponent? _bedroom;
   DateTime? lastBackgroundTime;
 
   @override
@@ -29,11 +30,8 @@ class PetGame extends FlameGame with HasCollisionDetection {
     statusSystem = StatusSystem(this);
     adSystem = AdSystem(this);
     audioManager = AudioManager();
-    try {
-      final bgImg = await images.load('bg_room.png');
-      _bg = SpriteComponent(sprite: Sprite(bgImg), size: size, anchor: Anchor.topLeft, priority: -10);
-      add(_bg!);
-    } catch (_) {}
+    _bedroom = BedroomComponent();
+    add(_bedroom!);
     pet = PetComponent(game: this);
     add(pet);
     add(statusSystem);
@@ -239,8 +237,8 @@ class PetGame extends FlameGame with HasCollisionDetection {
   @override
   void onGameResize(Vector2 size) {
     super.onGameResize(size);
-    try { pet.position = size / 2; } catch (_) {}
-    try { _bg?.size = size; } catch (_) {}
+    _bedroom?.size = size;
+    try { pet.position = _bedroom?.bedCenter ?? size / 2; } catch (_) {}
   }
   @override
   void onRemove() { try { adSystem.dispose(); } catch (_) {} try { audioManager.dispose(); } catch (_) {} super.onRemove(); }

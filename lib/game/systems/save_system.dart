@@ -29,4 +29,7 @@ class SaveSystem {
 
   ShopItem? getShopItem(String id) => shopBox.get(id);
   List<ShopItem> get allShopItems => shopBox.values.toList();
+  List<ShopItem> getShopItems([ShopItemType? filter]) => filter == null
+      ? allShopItems
+      : shopBox.values.where((e) => e.type == filter).toList();
 }

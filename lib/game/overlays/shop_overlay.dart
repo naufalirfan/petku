@@ -2,14 +2,26 @@ import 'package:flutter/material.dart';
 import '../pet_game.dart';
 import '../../data/models/pet_state.dart';
 
-class ShopOverlay extends StatelessWidget {
+class ShopOverlay extends StatefulWidget {
   final PetGame game;
-  const ShopOverlay({super.key, required this.game});
+  final ShopItemType? initialFilter;
+  const ShopOverlay({super.key, required this.game, this.initialFilter});
+  @override
+  State<ShopOverlay> createState() => _ShopOverlayState();
+}
 
+class _ShopOverlayState extends State<ShopOverlay> {
+  ShopItemType? _filter;
+  @override
+  void initState() {
+    super.initState();
+    _filter = widget.initialFilter;
+  }
   @override
   Widget build(BuildContext context) {
-    final items = game.saveSystem.allShopItems;
-    final s = game.petState;
+    final items = _filter == null ? widget.game.saveSystem.allShopItems
+        : widget.game.saveSystem.getShopItems(_filter);
+    final s = widget.game.petState;
     return Material(
       color: Colors.black54,
       child: Center(
@@ -26,10 +38,24 @@ class ShopOverlay extends StatelessWidget {
                 const Spacer(),
                 Text('\u{1FA99} ${s.coins}', style: const TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF6C5CE7))),
                 IconButton(
-                  onPressed: () => game.overlays.remove('ShopOverlay'),
+                  onPressed: () => widget.game.overlays.remove('ShopOverlay'),
                   icon: const Icon(Icons.close),
                 ),
               ]),
+              const SizedBox(height: 8),
+              // filter tabs
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(children: [
+                  _tab(null, 'Semua'),
+                  const SizedBox(width: 8),
+                  _tab(ShopItemType.outfit, 'Closet'),
+                  const SizedBox(width: 8),
+                  _tab(ShopItemType.food, 'Makanan'),
+                  const SizedBox(width: 8),
+                  _tab(ShopItemType.furniture, 'Furniture'),
+                ]),
+              ),
               const Divider(),
               Flexible(
                 child: GridView.builder(
@@ -48,7 +74,6 @@ class ShopOverlay extends StatelessWidget {
                       ),
                       padding: const EdgeInsets.all(10),
                       child: Column(children: [
-                        // sprite atau fallback emoji
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Image.asset(
@@ -71,13 +96,13 @@ class ShopOverlay extends StatelessWidget {
                           height: 34,
                           child: ElevatedButton(
                             onPressed: owned
-                                ? (it.type == ShopItemType.outfit ? () { game.equipOutfit(it.id); (context as Element).markNeedsBuild(); } : null)
+                                ? (it.type == ShopItemType.outfit ? () { widget.game.equipOutfit(it.id); setState(() {}); } : null)
                                 : canBuy
                                     ? () {
-                                        final ok = game.buyItem(it.id);
+                                        final ok = widget.game.buyItem(it.id);
                                         if (ok) {
                                           ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Beli ${it.name}!'), duration: const Duration(seconds: 1)));
-                                          (context as Element).markNeedsBuild();
+                                          setState(() {});
                                         }
                                       }
                                     : null,
@@ -101,4 +126,12 @@ class ShopOverlay extends StatelessWidget {
       ),
     );
   }
+
+  Widget _tab(ShopItemType? t, String label) => ChoiceChip(
+    label: Text(label),
+    selected: _filter == t,
+    onSelected: (_) => setState(() => _filter = t),
+    selectedColor: const Color(0xFF6C5CE7).withValues(alpha: 0.2),
+    labelStyle: TextStyle(color: _filter == t ? const Color(0xFF6C5CE7) : Colors.black87, fontWeight: _filter == t ? FontWeight.bold : FontWeight.normal),
+  );
 }

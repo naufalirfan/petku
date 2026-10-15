@@ -111,6 +111,7 @@ class _GameScreenState extends State<GameScreen> with WidgetsBindingObserver {
       overlayBuilderMap: {
         'HUD': (c, g) => HUDOverlay(game: g as PetGame),
         'ShopOverlay': (c, g) => ShopOverlay(game: g as PetGame),
+        'ClosetOverlay': (c, g) => ShopOverlay(game: g as PetGame, initialFilter: ShopItemType.outfit),
         'MiniGameCatch': (c, g) => MiniGameCatchOverlay(game: g as PetGame),
         'MiniGameWhack': (c, g) => MiniGameWhackOverlay(game: g as PetGame),
         'SettingsOverlay': (c, g) => SettingsOverlay(game: g as PetGame),

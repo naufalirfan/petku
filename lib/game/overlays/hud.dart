@@ -173,6 +173,7 @@ class _HUDOverlayState extends State<HUDOverlay> {
   }
 
   void _onShop() => game.overlays.add('ShopOverlay');
+  void _onCloset() => game.overlays.add('ClosetOverlay');
 
   @override
   Widget build(BuildContext context) {
@@ -220,7 +221,8 @@ class _HUDOverlayState extends State<HUDOverlay> {
               children: [
                 _action(Icons.restaurant, 'Makan', _onEat),
                 _action(Icons.bathtub, 'Mandi', _onBath),
-                _action(Icons.bedtime, 'Tidur', _onSleep),
+                _action(Icons.checkroom, 'Closet', _onCloset),
+                _action(Icons.lightbulb_outline, 'Lamp', _onSleep),
                 _action(Icons.videogame_asset, 'Main', _onPlay),
                 _action(Icons.store, 'Toko', _onShop),
               ],
